@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Knihovna", "Knihovna\Knihovna.csproj", "{33B0A3C8-B915-483F-9475-2C0A3FE96C14}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{33B0A3C8-B915-483F-9475-2C0A3FE96C14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33B0A3C8-B915-483F-9475-2C0A3FE96C14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33B0A3C8-B915-483F-9475-2C0A3FE96C14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33B0A3C8-B915-483F-9475-2C0A3FE96C14}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5B12DB10-37C7-4834-8692-85C9FA696371}
+	EndGlobalSection
+EndGlobal
