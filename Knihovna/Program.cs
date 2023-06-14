@@ -1,164 +1,153 @@
 ﻿using Spectre.Console;
-using System.ComponentModel.Design;
-using System.Net;
-using System.Reflection;
-using System.Threading.Channels;
 
 class ProjektKveten
 {
-    public static void Main()
+
+    private class Kniha 
     {
-        try
-        {
-            var moznost = new List<string>(); //Vytvoří list který vypíše možnosti co chce uživatel dělat
-            var praceSKnihou = new List<string>(); //Vytvoří list kde budou možnosti jestli knihu přidat a nebo jít zpět
-            //Přidá: Přidat a zpět
-            praceSKnihou.Add("Přidat knihu");
-            praceSKnihou.Add("Zpět");
-            //Přidá možnosti co chceme dělat s knihovnou
-            moznost.Add("Vytvoření nové knihy");
-            moznost.Add("Výpis všech knih");
-            moznost.Add("Vyhledání knihy podle autora");
-            moznost.Add("Vyhledání knihy podle roku vydání");
-            bool opakovani = true;
-            while (opakovani)
-            {
-            Zpet:
-                bool pridatKnihu = true;
+
+        public Kniha(string nazev, string autor, int year) {
+            Nazev = nazev;
+            Autor = autor;
+            Rok = year;
+        }
+
+        public string Nazev { get; set; }
+        public string Autor { get; set; }
+        public int Rok { get; set; }
+    }
+
+    private static class Program 
+    {
+
+        public static List<string> moznost = new() { "Vytvoření nové knihy", "Výpis všech knih", "Vyhledání knihy podle autora", "Vyhledání knihy podle roku vydání", "[red]KONEC[/]" }; //Vytvoří list který vypíše možnosti co chce uživatel dělat
+        public static List<string> praceSKnihou = new() { "Přidat knihu", "Zpět" }; //Vytvoří list kde budou možnosti jestli knihu přidat a nebo jít zpět
+        
+        public static void VytvorKnihu() {
+            
+            while (true) {
+                
                 Console.Clear();
-                //Vypíše možnosti
-                Console.WriteLine("Vyber možnost");
-                var vyber = AnsiConsole.Prompt(
+
+                var vyberKnihy = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
+                        .Title("Přidej Knihu")
                         .PageSize(10)
-                        .AddChoices(moznost));
-                //Vytvoření nové knihy
-                if (vyber == "Vytvoření nové knihy")
-                {
-                    bool opakovaniZadani = true; //Nastaveno opakování praceSKnihou
-                    while (opakovaniZadani)
-                    {
-                        Console.Clear();
-                        var vyberKnihy = AnsiConsole.Prompt(
-                            new SelectionPrompt<string>()
-                                .Title("Přidej Knihu")
-                                .PageSize(10)
-                                .MoreChoicesText("[grey](Vyber šipkami)[/]")
-                                .AddChoices(praceSKnihou));
-                        if (vyberKnihy == "Zpět") //Volba zpět
-                        {
-                            opakovaniZadani = false; //Vypne opakování
-                            goto Zpet; //Přesune se na výpis možností
-                        }
-                        if (vyberKnihy == "Přidat knihu") //Volba Přidat Knihu
-                        {
-                            Console.WriteLine("Zadej informace:");
-                            Console.WriteLine("----------------------");
-                            var nazev = AnsiConsole.Ask<string>("Název: "); //Zeptá se na název a uživatel ho zadá
-                            var autor = AnsiConsole.Ask<string>("Autor: "); //Zeptá se na jméno autora a uživatel ho zadá
-                            var rok = AnsiConsole.Ask<string>("Rok: "); //Zeptá se na rok a uživatel ho zadá
-                            File.WriteAllText(nazev + ".txt", "Název: " + nazev + ", Autor: " + autor + ", Rok: " + rok); //Zapíšou se informace do textového souboru
+                        .MoreChoicesText("[grey](Vyber šipkami)[/]")
+                        .AddChoices(praceSKnihou)
+                );
 
-                        }
-                    }
-                }
-                //Výpis všech knih
-                if (vyber == "Výpis všech knih")
-                {
-                    praceSKnihou.Remove("Zpět"); //Odebere možnost Zpět aby se nepočítala v listu jako kniha a nevypsalo se že kniha není zadaná
-                    Console.Clear();
-                    //Pro každou knihu v listu praceSKnihou
-                    foreach (var nazev in praceSKnihou)
-                    {
-                        try
-                        {
-                            string obsahSouboru = File.ReadAllText(nazev + ".txt"); //Do proměnné obsahSouboru se napíšou informace z textového souboru který je uložen v počítači
-                            Console.WriteLine(obsahSouboru); //Vypíše obsah souboru
-                        }
-                        catch //Kdyby v souboru nebyli zapsané informace, vypíše -KNIHA NEZADÁNA-
-                        {
-                            Console.WriteLine("");
-                            Console.WriteLine("-KNIHA NEZADÁNA-");
-                        }
-                    }
-                    Console.ReadLine();
-                    praceSKnihou.Add("Zpět"); //Vrátí zpět možnost zpět
-                }
-                //Vyhledání knihy podle autora
-                if (vyber == "Vyhledání knihy podle autora")
-                {
-                    Console.Clear();
-                    var hledanyAutor = AnsiConsole.Ask<string>("Zadejte jméno autora knihy: "); //Zeptá se na jméno autora kterého chce najít a uživatel ho zadá
-                    Console.Clear();
-                    Console.WriteLine("Knihy od autora " + hledanyAutor + ":"); //Vypíše knihy od autora
 
-                    bool nalezenaKniha = false; //Vytvoří se proměnná které určuje jestli byla alespoň 1 kniha nalezena (false = nebyla nalezena)
-                    //Pro každou knihu v listu praceSKnihou
-                    foreach (var vyberKnihy in praceSKnihou)
-                    {
-                        try
-                        {
-                            string obsahSouboru = File.ReadAllText(vyberKnihy + ".txt"); //Do proměnné obsahSouboru se vypíšou informace z textového souboru který je uložen v počítači se zadaným autorem
-                            if (obsahSouboru.Contains(hledanyAutor)) //Je-li v informacích zapsáno jméno autora pokračuje se do if
-                            {
-                                nalezenaKniha = true; //Kniha byla nalezena
-                                Console.WriteLine(obsahSouboru); //Vypíše obsah souboru
-                            }
-                        }
-                        catch
-                        {
-                            //Když v obsahu souboru není zapsán autor, nevypíše se nic
-                        }
-                    }
+                if (vyberKnihy == "Zpět") break;//Volba zpět
 
-                    if (!nalezenaKniha) //Nebyla nalezena žádná kniha
-                    {
-                        Console.Clear();
-                        Console.WriteLine("Od autora " + hledanyAutor + " nebyla nalezena žádná kniha."); //Vypíše: Od autora nebyla nalezena žádná kniha.
-                    }
-
-                    Console.ReadLine();
-                }
-                //Vyhledání knihy podle roku
-                if (vyber == "Vyhledání knihy podle roku vydání")
-                {
-                    Console.Clear();
-                    var hledanyRok = AnsiConsole.Ask<string>("Zadejte rok vydání knihy: "); //Zeptá se na rok z kterého chce knihu najít a uživatel ho zadá
-                    Console.Clear();
-                    Console.WriteLine("Knihy z roku " + hledanyRok + ":"); //Vypíše knihy z daného roku
-
-                    bool nalezenaKniha = false; //Vytvoří se proměnná které určuje jestli byla alespoň 1 kniha nalezena (false = nebyla nalezena)
-                    //Pro každou knihu v listu praceSKnihou
-                    foreach (var rokKnihy in praceSKnihou)
-                    {
-                        try
-                        {
-                            string obsahSouboru = File.ReadAllText(rokKnihy + ".txt"); //Do proměnné obsahSouboru se vypíšou informace z textového souboru který je uložen v počítači se zadaným rokem
-                            if (obsahSouboru.Contains(hledanyRok)) //Je-li v informacích zapsán rok pokračuje se do if
-                            {
-                                nalezenaKniha = true; //Kniha byla nalezena
-                                Console.WriteLine(obsahSouboru); //Vypíše obsah souboru
-                            }
-                        }
-                        catch
-                        {
-                            //Když v obsahu souboru není zapsán rok, nevypíše se nic
-                        }
-                    }
-
-                    if (!nalezenaKniha) //Nebyla nalezena žádná kniha
-                    {
-                        Console.Clear();
-                        Console.WriteLine("Z roku " + hledanyRok + " nebyla nalezena žádná kniha."); //Vypíše: Z roku nebyla nalezena žádná kniha.
-                    }
-
-                    Console.ReadLine();
+                if (vyberKnihy == "Přidat knihu") { //Volba Přidat Knihu
+                    Console.WriteLine("Zadej informace:");
+                    Console.WriteLine("----------------------");
+                    var nazev = AnsiConsole.Ask<string>("Název: "); //Zeptá se na název a uživatel ho zadá
+                    var autor = AnsiConsole.Ask<string>("Autor: "); //Zeptá se na jméno autora a uživatel ho zadá
+                    var rok = AnsiConsole.Ask<int>("Rok: "); //Zeptá se na rok a uživatel ho zadá
+                    File.AppendAllText("knihovna.txt", $"{nazev},{autor},{rok}\n"); //Zapíšou se informace do textového souboru
                 }
             }
         }
-        catch
+        public static void VypisVsechnyKnihy() {
+            Console.Clear();
+
+            string[] řádky = File.ReadAllLines("knihovna.txt");
+            var vsechnyKnihy = new List<Kniha>();
+
+            foreach(var řádek in řádky) {
+                string[] data = řádek.Split(',');
+                string jmeno = data[0];
+                string autor = data[1];
+                int rok = int.Parse(data[2]);
+
+                vsechnyKnihy.Add(new Kniha(jmeno, autor, rok));
+            }
+
+            Console.WriteLine("List všech knih:\n");
+            foreach (var kniha in vsechnyKnihy) {
+                Console.WriteLine();
+                Console.WriteLine($"Název: {kniha.Nazev}");
+                Console.WriteLine($"Autor: {kniha.Autor}");
+                Console.WriteLine($"Rok: {kniha.Rok}");
+                Console.WriteLine();
+            }
+
+            Console.ReadKey();
+        }
+        public static void VyhledejKnihyPodle(string typ) {
+
+            Console.Clear();
+            bool hledaSePodleRoku = false; // defaultně je nastaveno, že se nehledá podle roku
+            if (typ == "roku") hledaSePodleRoku = true;
+            
+            var vsechnyKnihy = new List<Kniha>(); // vytvoří se list se všehmi knihami
+            string[] řádky = File.ReadAllLines("knihovna.txt"); // přečtou se všechny řádky
+            foreach (var řádek in řádky) 
+            {
+                string[] informace = řádek.Split(',');
+                vsechnyKnihy.Add(new Kniha(informace[0], informace[1], int.Parse(informace[2]))); // do listu s knihama se přidá kniha
+            }
+
+            string input = "";
+            int inputToNumber = 0;
+            if (hledaSePodleRoku == false) input = AnsiConsole.Ask<string>("Zadejte jméno autora knihy: "); //Zeptá se na jméno autora kterého chce najít a uživatel ho zadá
+            if (hledaSePodleRoku == true) inputToNumber = AnsiConsole.Ask<int>("Zadejte rok vydání knihy: "); //Zeptá se na rok vydání knihy
+
+            var nalezeneKnihy = new List<Kniha>(); // vytvoří se list, kam se dají nalezené knihy
+            Console.Clear();
+
+
+            if(hledaSePodleRoku == true) nalezeneKnihy = vsechnyKnihy.FindAll(kniha => kniha.Rok == inputToNumber);
+            if(hledaSePodleRoku == false) nalezeneKnihy = vsechnyKnihy.FindAll(kniha => kniha.Autor == input);
+
+
+            // pokud se něco našlo
+            if(nalezeneKnihy.Count > 0) 
+            {
+                Console.Clear();
+                foreach (var kniha in nalezeneKnihy) {
+                    Console.WriteLine();
+                    Console.WriteLine($"Název: {kniha.Nazev}");
+                    Console.WriteLine($"Autor: {kniha.Autor}");
+                    Console.WriteLine($"Rok: {kniha.Rok}");
+                    Console.WriteLine();
+                }
+
+                Console.ReadKey();
+            } else {
+                Console.Clear();
+                AnsiConsole.MarkupLine("[red]Nebyla nalezena žádná kniha![/]");
+                Console.ReadKey();
+            }
+        }
+    }
+
+    public static void Main()
+    {
+        while (true)
         {
-            Console.WriteLine("Něco se pokazilo!");
+            Console.Clear();
+
+            //Vypíše možnosti
+            var vyber = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                .Title("Vyber možnost")
+                .PageSize(10)
+                .AddChoices(Program.moznost)
+            );
+
+
+            //Vytvoření nové knihy
+            if (vyber == "Vytvoření nové knihy") Program.VytvorKnihu();
+            //Výpis všech knih
+            if (vyber == "Výpis všech knih") Program.VypisVsechnyKnihy();
+            //Vyhledání knihy podle roku
+            if (vyber == "Vyhledání knihy podle roku vydání") Program.VyhledejKnihyPodle("roku");
+            //Vyhledání knihy podle autora
+            if (vyber == "Vyhledání knihy podle autora") Program.VyhledejKnihyPodle("autora");
+            if (vyber == "[red]KONEC[/]") break;
         }
     }
 }
