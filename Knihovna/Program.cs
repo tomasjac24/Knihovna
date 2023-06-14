@@ -1,7 +1,6 @@
 ﻿using Spectre.Console;
 
-class ProjektKveten
-{
+class ProjektKveten {
 
     private class Kniha 
     {
